@@ -1,0 +1,67 @@
+Combination,Volume_Fraction,Volume_Fraction_Percent,Young_Modulus_GPa,Young_Modulus_ci_lower,Young_Modulus_ci_upper,Thermal_Conductivity_WperMk,Thermal_Conductivity_ci_lower,Thermal_Conductivity_ci_upper,Enhancement_Factor
+Carbon Fiber+Graphene Nanoplatelets,0.050,5.000,11.385,8.631,14.229,6.597,2.791,13.373,3.162
+Carbon Fiber+Graphene Nanoplatelets,0.100,10.000,22.800,16.996,28.665,14.593,5.916,30.534,6.333
+Carbon Fiber+Graphene Nanoplatelets,0.150,15.000,34.622,25.611,43.601,31.899,11.897,69.511,9.617
+Carbon Fiber+Graphene Nanoplatelets,0.200,20.000,50.692,37.245,63.979,71.063,26.360,155.040,14.081
+Carbon Fiber+Graphene Nanoplatelets,0.250,25.000,62.868,45.983,79.466,113.300,42.047,247.370,17.463
+Carbon Fiber+Graphene Nanoplatelets,0.300,30.000,75.104,54.739,95.087,168.089,62.509,366.656,20.862
+Carbon Fiber+Carbon Nanotubes,0.050,5.000,11.420,8.678,14.290,6.556,2.773,13.369,3.172
+Carbon Fiber+Carbon Nanotubes,0.100,10.000,22.866,17.143,28.849,14.501,6.004,29.910,6.352
+Carbon Fiber+Carbon Nanotubes,0.150,15.000,34.717,25.798,43.890,31.706,12.006,67.556,9.644
+Carbon Fiber+Carbon Nanotubes,0.200,20.000,50.826,37.475,64.362,70.488,26.643,150.569,14.118
+Carbon Fiber+Carbon Nanotubes,0.250,25.000,63.031,46.220,79.916,111.603,42.507,232.043,17.509
+Carbon Fiber+Carbon Nanotubes,0.300,30.000,75.295,55.115,95.658,163.051,63.236,304.995,20.915
+Graphene Nanoplatelets+Carbon Nanotubes,0.050,5.000,17.265,13.627,20.781,53.497,42.112,64.624,4.796
+Graphene Nanoplatelets+Carbon Nanotubes,0.100,10.000,33.883,26.489,41.031,107.630,87.000,129.249,9.412
+Graphene Nanoplatelets+Carbon Nanotubes,0.150,15.000,50.320,39.212,61.023,161.480,130.536,193.873,13.978
+Graphene Nanoplatelets+Carbon Nanotubes,0.200,20.000,71.911,55.861,87.427,233.251,188.552,280.038,19.975
+Graphene Nanoplatelets+Carbon Nanotubes,0.250,25.000,87.850,68.137,106.970,287.077,232.064,344.661,24.403
+Graphene Nanoplatelets+Carbon Nanotubes,0.300,30.000,103.569,80.151,126.207,340.904,275.576,409.284,28.769
+Graphene Nanoplatelets+Glass Fiber,0.050,5.000,6.665,5.241,8.099,6.572,2.791,13.298,1.851
+Graphene Nanoplatelets+Glass Fiber,0.100,10.000,12.333,9.573,15.136,13.470,5.721,27.257,3.426
+Graphene Nanoplatelets+Glass Fiber,0.150,15.000,17.792,13.750,21.877,20.719,8.800,41.928,4.942
+Graphene Nanoplatelets+Glass Fiber,0.200,20.000,24.725,19.078,30.412,30.981,13.158,62.693,6.868
+Graphene Nanoplatelets+Glass Fiber,0.250,25.000,29.659,22.887,36.490,39.164,16.633,79.252,8.239
+Graphene Nanoplatelets+Glass Fiber,0.300,30.000,34.363,26.523,42.280,47.802,20.302,96.733,9.545
+Carbon Fiber+Glass Fiber,0.050,5.000,1.902,1.747,2.064,0.250,0.250,0.250,0.528
+Carbon Fiber+Glass Fiber,0.100,10.000,3.043,2.723,3.378,0.270,0.250,0.365,0.845
+Carbon Fiber+Glass Fiber,0.150,15.000,4.261,3.781,4.758,0.384,0.254,0.561,1.184
+Carbon Fiber+Glass Fiber,0.200,20.000,5.949,5.268,6.642,0.573,0.378,0.837,1.652
+Carbon Fiber+Glass Fiber,0.250,25.000,7.239,6.424,8.079,0.723,0.477,1.058,2.011
+Carbon Fiber+Glass Fiber,0.300,30.000,8.539,7.588,9.519,0.882,0.581,1.290,2.372
+Carbon Nanotubes+Glass Fiber,0.050,5.000,6.663,5.282,8.102,6.550,2.743,13.418,1.851
+Carbon Nanotubes+Glass Fiber,0.100,10.000,12.329,9.653,15.127,13.425,5.621,27.504,3.425
+Carbon Nanotubes+Glass Fiber,0.150,15.000,17.786,13.873,21.878,20.650,8.647,42.307,4.940
+Carbon Nanotubes+Glass Fiber,0.200,20.000,24.714,19.250,30.420,30.877,12.929,63.260,6.865
+Carbon Nanotubes+Glass Fiber,0.250,25.000,29.645,23.069,36.499,39.032,16.344,79.968,8.235
+Carbon Nanotubes+Glass Fiber,0.300,30.000,34.346,26.729,42.274,47.642,19.948,97.607,9.540
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes,0.050,5.000,11.209,8.867,13.523,34.823,21.273,43.231,3.114
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes,0.100,10.000,22.609,17.720,27.383,71.699,57.628,86.510,6.280
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes,0.150,15.000,34.059,26.615,41.295,108.655,87.286,131.963,9.461
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes,0.200,20.000,49.263,38.478,59.806,164.279,130.393,204.731,13.684
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes,0.250,25.000,60.575,47.283,73.581,210.504,165.531,268.698,16.826
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes,0.300,30.000,71.790,55.944,87.292,260.248,202.844,340.159,19.942
+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.050,5.000,6.240,5.071,7.405,34.718,21.499,43.215,1.733
+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.100,10.000,12.095,9.737,14.436,71.598,57.535,86.644,3.360
+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.150,15.000,17.753,14.239,21.219,107.541,86.890,129.966,4.931
+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.200,20.000,24.958,19.982,29.867,155.357,125.615,187.728,6.933
+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.250,25.000,30.107,24.063,36.042,191.210,154.603,231.050,8.363
+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.300,30.000,35.037,27.985,41.952,227.061,183.591,274.371,9.732
+Carbon Fiber+Graphene Nanoplatelets+Glass Fiber,0.050,5.000,4.284,3.361,5.234,4.337,1.843,8.671,1.190
+Carbon Fiber+Graphene Nanoplatelets+Glass Fiber,0.100,10.000,8.390,6.518,10.292,8.823,3.746,17.701,2.331
+Carbon Fiber+Graphene Nanoplatelets+Glass Fiber,0.150,15.000,12.530,9.697,15.361,14.489,6.020,30.316,3.481
+Carbon Fiber+Graphene Nanoplatelets+Glass Fiber,0.200,20.000,17.981,13.873,22.081,29.257,11.067,64.318,4.995
+Carbon Fiber+Graphene Nanoplatelets+Glass Fiber,0.250,25.000,21.974,16.923,26.989,45.724,17.200,100.696,6.104
+Carbon Fiber+Graphene Nanoplatelets+Glass Fiber,0.300,30.000,25.867,19.900,31.790,66.678,25.054,146.875,7.185
+Carbon Fiber+Carbon Nanotubes+Glass Fiber,0.050,5.000,4.271,3.381,5.221,4.325,1.824,8.836,1.186
+Carbon Fiber+Carbon Nanotubes+Glass Fiber,0.100,10.000,8.361,6.558,10.268,8.801,3.719,17.986,2.323
+Carbon Fiber+Carbon Nanotubes+Glass Fiber,0.150,15.000,12.485,9.751,15.355,14.465,5.922,30.425,3.468
+Carbon Fiber+Carbon Nanotubes+Glass Fiber,0.200,20.000,17.913,13.949,22.017,29.143,11.076,63.703,4.976
+Carbon Fiber+Carbon Nanotubes+Glass Fiber,0.250,25.000,21.889,17.012,26.898,45.509,17.203,99.718,6.080
+Carbon Fiber+Carbon Nanotubes+Glass Fiber,0.300,30.000,25.765,20.001,31.647,66.250,25.082,145.393,7.157
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.050,5.000,4.497,3.659,5.362,24.912,12.075,32.373,1.249
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.100,10.000,9.038,7.320,10.789,53.569,42.138,64.889,2.511
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.150,15.000,13.521,10.940,16.141,80.766,64.740,97.392,3.756
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.200,20.000,19.341,15.658,23.115,118.490,95.114,144.126,5.373
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.250,25.000,23.571,19.075,28.178,149.716,119.164,185.194,6.548
+Carbon Fiber+Graphene Nanoplatelets+Carbon Nanotubes+Glass Fiber,0.300,30.000,27.678,22.399,33.092,183.223,144.629,230.490,7.688
