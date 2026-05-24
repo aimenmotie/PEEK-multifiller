@@ -7,6 +7,8 @@ Handles CSV export, figure saving in multiple formats, and README generation.
 import os
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
 import json

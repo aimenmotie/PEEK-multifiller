@@ -10,6 +10,8 @@ full uncertainty propagation. Microstructure visualizations are also generated.
 """
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mechanical_models import MechanicalSimulator
 from thermal_models import ThermalSimulator
@@ -48,44 +50,83 @@ class PEEKCompositeSimulation:
         # Reinforcement phases (Filler library) with distribution parameters for Monte Carlo
         self.filler_properties = {
             'Carbon Fiber': {
-                'young_modulus': 230,
-                'tensile_strength': 3500,
-                'thermal_conductivity': 50,
-                'aspect_ratio': 20,
+                'young_modulus': 230,           # GPa [King2018] DOI: 10.1002/pc.24250
+                'tensile_strength': 3500,       # MPa [King2018]
+                'thermal_conductivity': 20.0,   # (50+2*5.0)/3 = 20 W/mK (isotropic average)
+                'k_axial': 50.0,                # W/mK [King2018]
+                'k_transverse': 5.0,            # W/mK [King2018]
+                'aspect_ratio': 20,             # [Wang2020] DOI: 10.1016/j.compositesb.2020.108175
+                'geometry': 'fiber',            # 1D reinforcement
+                'radius_nm': 5000.0,            # 5 μm = 5000 nm [Manuscript ¶46]
+                'poisson_ratio': 0.20,          # [King2018; Wang2020]
                 'color': '#2c3e50',
                 'marker': 'o',
                 'young_modulus_dist': {'scale': 0.08, 'low': 0.7, 'high': 1.3},
-                'aspect_ratio_dist': {'s': 0.2, 'low': 5, 'high': 50}
+                                                # 10% CV [Manuscript ¶57]
+                'aspect_ratio_dist': {'s': 0.2, 'low': 5, 'high': 50},
+                                                # σ=0.2 [Manuscript ¶59]
+                'k_axial_dist': {'scale': 0.10, 'low': 0.5, 'high': 1.5},
+                                                # 10% CV [Manuscript ¶58]
+                'k_transverse_dist': {'scale': 0.10, 'low': 0.5, 'high': 1.5}
             },
             'Graphene Nanoplatelets': {
-                'young_modulus': 1000,
-                'tensile_strength': 5000,
-                'thermal_conductivity': 3000,
-                'aspect_ratio': 1000,
+                'young_modulus': 1000,          # GPa [King2018; Chen2016]
+                'tensile_strength': 5000,       # MPa
+                'thermal_conductivity': 1200.0, # (3000+2*300)/3 = 1200 W/mK (isotropic average)
+                'k_axial': 3000.0,              # W/mK in-plane [King2018; Chen2016]
+                'k_transverse': 300.0,          # W/mK through-thickness [King2018; Chen2016]
+                'aspect_ratio': 1000,           # diameter/thickness [King2018]
+                'geometry': 'platelet',         # 2D reinforcement
+                'radius_nm': 10.0,              # half-thickness = 10 nm [Manuscript ¶46]
+                'poisson_ratio': 0.16,          # [King2018]
                 'color': '#000000',
                 'marker': 's',
                 'young_modulus_dist': {'scale': 0.15, 'low': 0.5, 'high': 1.5},
-                'aspect_ratio_dist': {'s': 0.4, 'low': 100, 'high': 5000}
+                                                # 15% CV [Manuscript ¶57]
+                'aspect_ratio_dist': {'s': 0.4, 'low': 100, 'high': 5000},
+                                                # σ=0.4 [Manuscript ¶59]
+                'k_axial_dist': {'scale': 0.15, 'low': 0.5, 'high': 1.5},
+                                                # 15% CV [Manuscript ¶58]
+                'k_transverse_dist': {'scale': 0.15, 'low': 0.5, 'high': 1.5}
             },
             'Glass Fiber': {
-                'young_modulus': 72,
-                'tensile_strength': 2000,
-                'thermal_conductivity': 1.0,
-                'aspect_ratio': 15,
+                'young_modulus': 72,            # GPa [Wang2020]
+                'tensile_strength': 2000,       # MPa
+                'thermal_conductivity': 1.0,    # W/mK (isotropic) [Wang2020]
+                'k_axial': 1.0,                 # W/mK [Wang2020]
+                'k_transverse': 1.0,            # W/mK [Wang2020]
+                'aspect_ratio': 15,             # [Wang2020]
+                'geometry': 'fiber',            # 1D reinforcement
+                'radius_nm': 5000.0,            # 5 μm = 5000 nm [Manuscript ¶46]
+                'poisson_ratio': 0.22,          # [Wang2020]
                 'color': '#2980b9',
                 'marker': '^',
                 'young_modulus_dist': {'scale': 0.05, 'low': 0.8, 'high': 1.2},
-                'aspect_ratio_dist': {'s': 0.15, 'low': 10, 'high': 30}
+                                                # 10% CV [Manuscript ¶57]
+                'aspect_ratio_dist': {'s': 0.15, 'low': 10, 'high': 30},
+                                                # σ=0.15 [Manuscript ¶59]
+                'k_axial_dist': {'scale': 0.10, 'low': 0.5, 'high': 1.5},
+                'k_transverse_dist': {'scale': 0.10, 'low': 0.5, 'high': 1.5}
             },
             'Carbon Nanotubes': {
-                'young_modulus': 1000,
-                'tensile_strength': 10000,
-                'thermal_conductivity': 2000,
-                'aspect_ratio': 1000,
+                'young_modulus': 1000,          # GPa [Chen2016; Kim2018]
+                'tensile_strength': 10000,      # MPa
+                'thermal_conductivity': 680.0,   # (2000+2*20)/3 = 680 W/mK (isotropic average)
+                'k_axial': 2000.0,              # W/mK axial [Chen2016]
+                'k_transverse': 20.0,           # W/mK transverse [Chen2016; Kim2018]
+                'aspect_ratio': 1000,           # [Chen2016]
+                'geometry': 'fiber',            # 1D reinforcement
+                'radius_nm': 5.0,               # 5 nm [Manuscript ¶46]
+                'poisson_ratio': 0.20,          # [Kim2018; Chen2016]
                 'color': '#c0392b',
                 'marker': 'D',
                 'young_modulus_dist': {'scale': 0.15, 'low': 0.5, 'high': 1.5},
-                'aspect_ratio_dist': {'s': 0.4, 'low': 100, 'high': 5000}
+                                                # 15% CV [Manuscript ¶57]
+                'aspect_ratio_dist': {'s': 0.4, 'low': 100, 'high': 5000},
+                                                # σ=0.4 [Manuscript ¶59]
+                'k_axial_dist': {'scale': 0.15, 'low': 0.5, 'high': 1.5},
+                                                # 15% CV [Manuscript ¶58]
+                'k_transverse_dist': {'scale': 0.15, 'low': 0.5, 'high': 1.5}
             }
         }
 
@@ -317,8 +358,8 @@ class PEEKCompositeSimulation:
                 mech_det[filler] = {
                     'young_modulus': {
                         'Halpin-Tsai': results['young_modulus']['Halpin-Tsai']['mean'],
-                        'ROM': np.zeros_like(self.volume_fractions),  # Placeholder
-                        'Mori-Tanaka': np.zeros_like(self.volume_fractions)  # Placeholder
+                        'ROM': None,
+                        'Mori-Tanaka': None  # Deprecated: see mori_tanaka() docstring
                     },
                     'tensile_strength': np.zeros_like(self.volume_fractions),
                     'enhancement_factor': results['enhancement_factor']

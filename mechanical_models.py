@@ -77,25 +77,23 @@ class MechanicalSimulator:
         return efficiency * E_f * V_f + self.E_m * (1 - V_f)
 
     def halpin_tsai(self, V_f: Union[float, np.ndarray], E_f: float,
-                    aspect_ratio: float, orientation: str = 'random') -> Union[float, np.ndarray]:
+                    aspect_ratio: float, orientation: str = 'random',
+                    geometry: str = 'fiber') -> Union[float, np.ndarray]:
         """
         Halpin‑Tsai equation for discontinuous reinforcements.
+        [TuckerLiang1999] DOI: 10.1016/S0266-3538(98)00120-1
+        [Toth2025] DOI: 10.1007/s00170-025-15738-x
 
-        Parameters
-        ----------
-        V_f : volume fraction (0‑1)
-        E_f : filler modulus (GPa)
-        aspect_ratio : length/diameter (for fibres) or diameter/thickness (for platelets)
-        orientation : 'random' (default) or 'aligned'.
-
-        Returns
-        -------
-        Composite Young's modulus (GPa)
+        Geometry factor ξ:
+          fiber:   ξ = 2·α
+          platelet: ξ = (2/3)·α
         """
-        if aspect_ratio > 10:          # fibre‑like
-            xi = 2 * aspect_ratio
-        else:                           # platelet‑like
-            xi = 2/3 * aspect_ratio
+        # --- Geometry factor ---
+        # [TuckerLiang1999]: ξ = 2α for fibers, ξ = (2/3)α for platelets
+        if geometry == 'platelet':
+            xi = (2.0 / 3.0) * aspect_ratio
+        else:  # 'fiber' (default)
+            xi = 2.0 * aspect_ratio
 
         numerator = (E_f / self.E_m) - 1
         denominator = (E_f / self.E_m) + xi
@@ -105,19 +103,32 @@ class MechanicalSimulator:
 
         if orientation == 'random':
             # Simple 3D random orientation factor (approximate)
+            # [Cox1952] DOI: 10.1088/0508-3443/3/3/302
+            # Manuscript ¶22: η₀ = 0.2 for ROM but HT uses ×0.5 for random
             E_c *= 0.5
 
         return E_c
 
     def mori_tanaka(self, V_f: Union[float, np.ndarray], E_f: float,
-                    aspect_ratio: Optional[float] = None) -> Union[float, np.ndarray]:
+                    aspect_ratio: Optional[float] = None,
+                    geometry: str = 'fiber') -> Union[float, np.ndarray]:
         """
         Mori‑Tanaka mean‑field homogenisation.
 
-        For spherical inclusions (aspect_ratio ≈ 1) the closed‑form expression
-        of [Mori & Tanaka, 1973] is used. For aligned ellipsoids a more general
-        treatment would be required; here we simply use the dilute estimate as a placeholder.
+        .. deprecated::
+            Full Eshelby orientation averaging is not implemented.
+            This function returns a Halpin-Tsai aligned approximation
+            and should not be used in publications.
+            [Dai2004] DOI: 10.1002/pc.10125
+            [TuckerLiang1999] DOI: 10.1016/S0266-3538(98)00120-1
         """
+        import warnings
+        warnings.warn(
+            "mori_tanaka(): full Eshelby orientation averaging is not "
+            "implemented; this function returns a Halpin-Tsai aligned "
+            "approximation and should not be used in publications.",
+            DeprecationWarning, stacklevel=2
+        )
         if aspect_ratio is None or aspect_ratio < 1.1:
             # Spherical inclusions – exact isotropic result
             r = E_f / self.E_m
@@ -125,8 +136,7 @@ class MechanicalSimulator:
                               (1 + (1 - V_f) * (r - 1) * (1 - 2*self.nu_m) / (1 + self.nu_m)))
         else:
             # Aligned inclusions – approximate (full orientation averaging not yet implemented)
-            # In a future version this will be replaced by integration over the stiffness tensor.
-            E_c = self.halpin_tsai(V_f, E_f, aspect_ratio, orientation='aligned')
+            E_c = self.halpin_tsai(V_f, E_f, aspect_ratio, orientation='aligned', geometry=geometry)
         return E_c
 
     # ----------------------------------------------------------------------
@@ -185,6 +195,7 @@ class MechanicalSimulator:
             props = self.fillers[filler_name]
             E_f = props['young_modulus']
             ar = props['aspect_ratio']
+            geom = props.get('geometry', 'fiber')
 
             # Halpin‑Tsai using current matrix
             # We need a local copy of the matrix modulus
@@ -192,7 +203,7 @@ class MechanicalSimulator:
             # Temporarily replace self.E_m to reuse halpin_tsai
             original_E_m = self.E_m
             self.E_m = E_matrix
-            E_comp = self.halpin_tsai(vf, E_f, ar, orientation)
+            E_comp = self.halpin_tsai(vf, E_f, ar, orientation, geometry=geom)
             self.E_m = original_E_m   # restore
 
             # Update matrix for next filler
@@ -344,6 +355,8 @@ class MechanicalSimulator:
             if return_samples:
                 results['samples'] = np.zeros((len(V_f), n_samples))
 
+            geom = props.get('geometry', 'fiber')
+
             for i, vf in enumerate(V_f):
                 if show_progress and i % 5 == 0:
                     print(f"    MC progress: Vf = {vf*100:.1f}%")
@@ -351,7 +364,7 @@ class MechanicalSimulator:
                 # Calculate modulus for each sample
                 E_samples = np.zeros(n_samples)
                 for j in range(n_samples):
-                    E_samples[j] = self.halpin_tsai(vf, E_f_samples[j], ar_samples[j], orientation)
+                    E_samples[j] = self.halpin_tsai(vf, E_f_samples[j], ar_samples[j], orientation, geometry=geom)
 
                 # Calculate statistics
                 results['mean'][i] = np.mean(E_samples)
@@ -364,9 +377,10 @@ class MechanicalSimulator:
 
         else:
             # Single volume fraction
+            geom = props.get('geometry', 'fiber')
             E_samples = np.zeros(n_samples)
             for j in range(n_samples):
-                E_samples[j] = self.halpin_tsai(V_f, E_f_samples[j], ar_samples[j], orientation)
+                E_samples[j] = self.halpin_tsai(V_f, E_f_samples[j], ar_samples[j], orientation, geometry=geom)
 
             results = {
                 'mean': np.mean(E_samples),
@@ -475,11 +489,12 @@ class MechanicalSimulator:
                             
                         E_f = filler_samples_all[filler]['young_modulus'][j]
                         ar = filler_samples_all[filler]['aspect_ratio'][j]
+                        geom = self.fillers[filler].get('geometry', 'fiber')
                         
                         # Halpin-Tsai with current matrix
                         original_E_m = self.E_m
                         self.E_m = E_current
-                        E_comp = self.halpin_tsai(vf, E_f, ar, orientation)
+                        E_comp = self.halpin_tsai(vf, E_f, ar, orientation, geometry=geom)
                         self.E_m = original_E_m
                         
                         E_current = E_comp
@@ -510,10 +525,11 @@ class MechanicalSimulator:
                         continue
                     E_f = filler_samples_all[filler]['young_modulus'][j]
                     ar = filler_samples_all[filler]['aspect_ratio'][j]
+                    geom = self.fillers[filler].get('geometry', 'fiber')
                     
                     original_E_m = self.E_m
                     self.E_m = E_current
-                    E_comp = self.halpin_tsai(vf, E_f, ar, orientation)
+                    E_comp = self.halpin_tsai(vf, E_f, ar, orientation, geometry=geom)
                     self.E_m = original_E_m
                     
                     E_current = E_comp
@@ -724,14 +740,15 @@ class MechanicalSimulator:
             E_f = props['young_modulus']
             ar = props['aspect_ratio']
             sigma_f = props['tensile_strength']
+            geom = props.get('geometry', 'fiber')
 
-            E_ht = self.halpin_tsai(volume_fractions, E_f, ar)
+            E_ht = self.halpin_tsai(volume_fractions, E_f, ar, geometry=geom)
 
             results[filler_name] = {
                 'young_modulus': {
                     'ROM': self.rule_of_mixtures(volume_fractions, E_f),
                     'Halpin-Tsai': E_ht,
-                    'Mori-Tanaka': self.mori_tanaka(volume_fractions, E_f, aspect_ratio=ar)
+                    'Mori-Tanaka': self.mori_tanaka(volume_fractions, E_f, aspect_ratio=ar, geometry=geom)
                 },
                 'tensile_strength': self.tensile_strength(volume_fractions, sigma_f, aspect_ratio=ar),
                 'enhancement_factor': E_ht / self.E_m

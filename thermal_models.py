@@ -118,45 +118,33 @@ class ThermalSimulator:
                 return self.maxwell_model(V_f, k_f)
 
     def nan_model(self, V_f: Union[float, np.ndarray], k_f: float,
-                  aspect_ratio: float, a_k: float = 0.1) -> Union[float, np.ndarray]:
+                  aspect_ratio: float, a_k: float = 0.1,
+                  k_f_transverse: Optional[float] = None,
+                  geometry: str = 'fiber',
+                  radius_nm: float = 5000.0) -> Union[float, np.ndarray]:
         """
         Nan's model incorporating Kapitza interfacial thermal resistance.
+        Now delegates to nan_anisotropic.nan_thermal_conductivity()
+        implementing [Nan1997] Eq. 23 (DOI: 10.1063/1.365209).
 
-        Parameters
-        ----------
-        V_f : volume fraction (0-1)
-        k_f : filler thermal conductivity (W/mK)
-        aspect_ratio : length/diameter (fibres) or diameter/thickness (platelets)
-        a_k : Kapitza radius (nm) = R_k * k_m, where R_k is interfacial resistance
-
-        Returns
-        -------
-        Composite thermal conductivity (W/mK)
+        If k_f_transverse is None, falls back to isotropic (k_f_transverse = k_f)
+        so legacy CF/GF code paths work unchanged.
         """
-        p = aspect_ratio
+        from nan_anisotropic import nan_thermal_conductivity
+
+        if k_f_transverse is None:
+            k_f_transverse = k_f  # isotropic fallback
 
         if isinstance(V_f, np.ndarray):
-            return np.array([self.nan_model(vf, k_f, aspect_ratio, a_k) for vf in V_f])
+            return np.array([self.nan_model(vf, k_f, aspect_ratio, a_k,
+                                            k_f_transverse, geometry, radius_nm) for vf in V_f])
 
-        # Calculate effective filler conductivity considering thermal boundary resistance
-        # Following Nan's formulation: k_f_eff = k_f / (1 + 2 * a_k * k_f / (p * k_m))
-        # where a_k = R_k * k_m is the Kapitza radius
-        k_f_eff = k_f / (1 + 2 * a_k * k_f / (p * self.k_m))
-
-        if p > 10:  # High aspect ratio (fibres, nanotubes, platelets)
-            # Simplified form for high aspect ratio inclusions
-            denominator = 3 + (1 - V_f) * (k_f_eff / self.k_m - 1)
-            if abs(denominator) < 1e-6:
-                return self.parallel_model(V_f, k_f)
-
-            numerator = 1 + V_f * p * (k_f_eff / self.k_m - 1)
-            k_eff = self.k_m * numerator / denominator
-        else:  # Low aspect ratio / spherical
-            k_eff = self.maxwell_model(V_f, k_f_eff)
-
-        # Ensure result is physically bounded
-        k_parallel = self.parallel_model(V_f, k_f)
-        return max(self.k_m, min(k_eff, k_parallel))
+        return nan_thermal_conductivity(
+            V_f=V_f, k_m=self.k_m,
+            k_f_axial=k_f, k_f_transverse=k_f_transverse,
+            aspect_ratio=aspect_ratio, geometry=geometry,
+            radius_nm=radius_nm, a_K_nm=a_k
+        )
 
     def series_model(self, V_f: Union[float, np.ndarray], k_f: float) -> Union[float, np.ndarray]:
         """Reuss Bound (Absolute Lower Limit)"""
@@ -212,13 +200,18 @@ class ThermalSimulator:
             if vf == 0:
                 continue
             props = self.fillers[filler_name]
-            k_f = props['thermal_conductivity']
+            k_f = props.get('k_axial', props['thermal_conductivity'])
+            k_f_trans = props.get('k_transverse', k_f)
             ar = props['aspect_ratio']
+            geom = props.get('geometry', 'fiber')
+            rad = props.get('radius_nm', 5000.0)
 
             # Nan model using current matrix
             original_k_m = self.k_m
             self.k_m = k_current
-            k_comp = self.nan_model(vf, k_f, ar, a_k)
+            k_comp = self.nan_model(vf, k_f, ar, a_k,
+                                    k_f_transverse=k_f_trans,
+                                    geometry=geom, radius_nm=rad)
             self.k_m = original_k_m
 
             # Update matrix for next filler
@@ -239,12 +232,26 @@ class ThermalSimulator:
         for name, props in self.fillers.items():
             samples[name] = {}
 
-            # Thermal conductivity
+            # Thermal conductivity (k_axial)
+            k_nominal = props.get('k_axial', props['thermal_conductivity'])
             dist_k = self.dist_config['thermal_conductivity'].copy()
             if 'thermal_conductivity_dist' in props:
                 dist_k.update(props['thermal_conductivity_dist'])
+            if 'k_axial_dist' in props:
+                dist_k.update(props['k_axial_dist'])
             samples[name]['thermal_conductivity'] = self._sample_from_dist(
-                dist_k, n_samples, nominal=props['thermal_conductivity']
+                dist_k, n_samples, nominal=k_nominal
+            )
+            # Replicate key as k_axial
+            samples[name]['k_axial'] = samples[name]['thermal_conductivity']
+
+            # Transverse thermal conductivity (k_transverse)
+            k_tr_nominal = props.get('k_transverse', k_nominal)
+            dist_k_tr = self.dist_config['thermal_conductivity'].copy()
+            if 'k_transverse_dist' in props:
+                dist_k_tr.update(props['k_transverse_dist'])
+            samples[name]['k_transverse'] = self._sample_from_dist(
+                dist_k_tr, n_samples, nominal=k_tr_nominal
             )
 
             # Aspect ratio
@@ -347,7 +354,11 @@ class ThermalSimulator:
         # Sample filler properties
         filler_samples = self.sample_filler_properties(n_samples)[filler_name]
         k_f_samples = filler_samples['thermal_conductivity']
+        k_f_ax_samples = filler_samples['k_axial']
+        k_f_tr_samples = filler_samples['k_transverse']
         ar_samples = filler_samples['aspect_ratio']
+        geom = props.get('geometry', 'fiber')
+        rad = props.get('radius_nm', 5000.0)
 
         if isinstance(V_f, np.ndarray):
             results = {
@@ -366,8 +377,10 @@ class ThermalSimulator:
 
                 k_samples = np.zeros(n_samples)
                 for j in range(n_samples):
-                    k_samples[j] = self.nan_model(vf, k_f_samples[j],
-                                                  ar_samples[j], a_k_samples[j])
+                    k_samples[j] = self.nan_model(vf, k_f_ax_samples[j],
+                                                  ar_samples[j], a_k_samples[j],
+                                                  k_f_transverse=k_f_tr_samples[j],
+                                                  geometry=geom, radius_nm=rad)
 
                 results['mean'][i] = np.mean(k_samples)
                 results['ci_lower'][i] = np.percentile(k_samples, 2.5)
@@ -380,8 +393,10 @@ class ThermalSimulator:
         else:
             k_samples = np.zeros(n_samples)
             for j in range(n_samples):
-                k_samples[j] = self.nan_model(V_f, k_f_samples[j],
-                                              ar_samples[j], a_k_samples[j])
+                k_samples[j] = self.nan_model(V_f, k_f_ax_samples[j],
+                                              ar_samples[j], a_k_samples[j],
+                                              k_f_transverse=k_f_tr_samples[j],
+                                              geometry=geom, radius_nm=rad)
 
             results = {
                 'mean': np.mean(k_samples),
@@ -475,14 +490,21 @@ class ThermalSimulator:
                         if vf == 0:
                             continue
 
-                        k_f = filler_samples_all[filler]['thermal_conductivity'][j]
+                        k_f_ax = filler_samples_all[filler]['k_axial'][j]
+                        k_f_tr = filler_samples_all[filler]['k_transverse'][j]
                         ar = filler_samples_all[filler]['aspect_ratio'][j]
                         a_k = a_k_samples[j]
+                        
+                        f_props = self.fillers[filler]
+                        geom = f_props.get('geometry', 'fiber')
+                        rad = f_props.get('radius_nm', 5000.0)
 
                         # Nan model with current matrix
                         original_k_m = self.k_m
                         self.k_m = k_current
-                        k_comp = self.nan_model(vf, k_f, ar, a_k)
+                        k_comp = self.nan_model(vf, k_f_ax, ar, a_k,
+                                                k_f_transverse=k_f_tr,
+                                                geometry=geom, radius_nm=rad)
                         self.k_m = original_k_m
 
                         k_current = k_comp
@@ -509,13 +531,20 @@ class ThermalSimulator:
                 for filler, vf in zip(filler_list, current_fractions):
                     if vf == 0:
                         continue
-                    k_f = filler_samples_all[filler]['thermal_conductivity'][j]
+                    k_f_ax = filler_samples_all[filler]['k_axial'][j]
+                    k_f_tr = filler_samples_all[filler]['k_transverse'][j]
                     ar = filler_samples_all[filler]['aspect_ratio'][j]
                     a_k = a_k_samples[j]
+                    
+                    f_props = self.fillers[filler]
+                    geom = f_props.get('geometry', 'fiber')
+                    rad = f_props.get('radius_nm', 5000.0)
 
                     original_k_m = self.k_m
                     self.k_m = k_current
-                    k_comp = self.nan_model(vf, k_f, ar, a_k)
+                    k_comp = self.nan_model(vf, k_f_ax, ar, a_k,
+                                            k_f_transverse=k_f_tr,
+                                            geometry=geom, radius_nm=rad)
                     self.k_m = original_k_m
 
                     k_current = k_comp
@@ -666,10 +695,15 @@ class ThermalSimulator:
         """
         results = {}
         for filler_name, props in self.fillers.items():
-            k_f = props['thermal_conductivity']
+            k_f = props.get('k_axial', props['thermal_conductivity'])
+            k_f_trans = props.get('k_transverse', k_f)
             aspect_ratio = props['aspect_ratio']
+            geom = props.get('geometry', 'fiber')
+            rad = props.get('radius_nm', 5000.0)
 
-            k_nan = self.nan_model(volume_fractions, k_f, aspect_ratio)
+            k_nan = self.nan_model(volume_fractions, k_f, aspect_ratio,
+                                   k_f_transverse=k_f_trans,
+                                   geometry=geom, radius_nm=rad)
             results[filler_name] = k_nan
 
             results[f'{filler_name}_all_models'] = {

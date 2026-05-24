@@ -5,6 +5,8 @@ Design map combines scatter points and regions in a single, clean figure.
 """
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter, LogLocator, NullFormatter, AutoMinorLocator
 from matplotlib.patches import Rectangle, Patch

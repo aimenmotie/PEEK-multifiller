@@ -6,6 +6,8 @@ Provides visualization for both single and hybrid filler systems.
 """
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Rectangle, Ellipse
 import matplotlib.patches as mpatches
