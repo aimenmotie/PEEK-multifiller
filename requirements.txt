@@ -1,8 +1,6 @@
 # requirements.txt
-"""
-Required Python packages for PEEK composite simulation framework.
-Install using: pip install -r requirements.txt
-"""
+# Required Python packages for PEEK composite simulation framework.
+# Install using: pip install -r requirements.txt
 
 # Core scientific computing
 numpy>=1.21.0

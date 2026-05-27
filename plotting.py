@@ -287,7 +287,29 @@ class PlotGenerator:
             binary_combos = short_names
 
         x = np.arange(len(binary_combos))
-        colors = [self.filler_colors.get(c.split('+')[0], self.rose_pine['love']) for c in binary_combos]
+        short_to_long = {
+            'CF': 'Carbon Fiber',
+            'GNP': 'Graphene Nanoplatelets',
+            'CNT': 'Carbon Nanotubes',
+            'GF': 'Glass Fiber'
+        }
+
+        def blend_colors(c1, c2):
+            c1_hex = c1.lstrip('#')
+            c2_hex = c2.lstrip('#')
+            r1, g1, b1 = int(c1_hex[0:2], 16), int(c1_hex[2:4], 16), int(c1_hex[4:6], 16)
+            r2, g2, b2 = int(c2_hex[0:2], 16), int(c2_hex[2:4], 16), int(c2_hex[4:6], 16)
+            r, g, b = int((r1 + r2) / 2), int((g1 + g2) / 2), int((b1 + b2) / 2)
+            return f'#{r:02x}{g:02x}{b:02x}'
+
+        colors = []
+        for combo in binary_combos:
+            parts = combo.split('+')
+            f1 = short_to_long.get(parts[0], 'Carbon Fiber')
+            f2 = short_to_long.get(parts[1], 'Carbon Fiber')
+            color1 = self.filler_colors.get(f1, self.rose_pine['love'])
+            color2 = self.filler_colors.get(f2, self.rose_pine['pine'])
+            colors.append(blend_colors(color1, color2))
 
         bars = ax.bar(x, values, yerr=errors, capsize=3,
                      color=colors, edgecolor='black', linewidth=0.8,
@@ -301,10 +323,11 @@ class PlotGenerator:
 
         ax.set_xticks(x)
         ax.set_xticklabels(binary_combos)
-        ax.set_ylabel("Young's Modulus at 30 vol% (GPa)")
+        ax.set_ylabel("Young's Modulus at 15 vol% (GPa)")
         ax.set_xlabel('Binary Combination')
         ax.tick_params(direction='in', top=True, right=True)
         ax.axhline(y=3.6, color='gray', linestyle='--', linewidth=1, label='Pure PEEK')
+        ax.set_ylim(0, 70)
         ax.legend(loc='upper right')
         plt.tight_layout()
         return fig
@@ -379,19 +402,19 @@ class PlotGenerator:
         # ------------------------------------------------------------------
         regions = [
             {
-                'name': 'Thermal Management',
+                'name': 'High-thermal envelope',
                 'rect': (0, 100, 50, 200),
                 'color': self.colors['foam'],
                 'desc': r'High conductivity: $k > 50$ W/mK'
             },
             {
-                'name': 'Biomedical',
+                'name': 'Moderate-property envelope',
                 'rect': (30, 100, 1, 30),
                 'color': self.colors['gold'],
                 'desc': r'Balanced: $E$ 30-100 GPa, $k$ 1-30 W/mK'
             },
             {
-                'name': 'Aerospace',
+                'name': 'High-stiffness envelope',
                 'rect': (100, 200, 0, 200),
                 'color': self.colors['love'],
                 'desc': r'High stiffness: $E > 100$ GPa'
@@ -451,9 +474,9 @@ class PlotGenerator:
             Patch(facecolor='none', edgecolor='none', label=''),
             Patch(facecolor='none', edgecolor='none', label='▬▬▬ TARGET REGIONS ▬▬▬'),
 
-            Patch(alpha=0.3, color=self.colors['love'], label=r'Aerospace: $E > 100$ GPa'),
-            Patch(alpha=0.3, color=self.colors['foam'], label=r'Thermal: $k > 50$ W/mK'),
-            Patch(alpha=0.3, color=self.colors['gold'], label=r'Biomedical: $E$ 30-100, $k$ 1-30 W/mK'),
+            Patch(alpha=0.3, color=self.colors['love'], label=r'High-stiffness envelope: $E > 100$ GPa'),
+            Patch(alpha=0.3, color=self.colors['foam'], label=r'High-thermal envelope: $k > 50$ W/mK'),
+            Patch(alpha=0.3, color=self.colors['gold'], label=r'Moderate-property envelope: $E$ 30-100, $k$ 1-30 W/mK'),
         ]
 
         ax.legend(

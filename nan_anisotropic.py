@@ -128,7 +128,7 @@ def nan_thermal_conductivity(V_f: float,
         Filler conductivity transverse to the symmetry axis (W/mK).
         Manuscript Table 1:
           CF:  5.0 W/mK   [King2018]
-          GNP: 300 W/mK (through-thickness) [King2018; Chen2016]
+          GNP: 5.0 W/mK (through-thickness) [King2018; Kim2016]
           CNT: 20 W/mK (transverse)  [Chen2016; Kim2018]
           GF:  1.0 W/mK  [Wang2020]
     aspect_ratio : float

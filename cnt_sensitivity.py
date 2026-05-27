@@ -22,7 +22,7 @@ os.makedirs('output/data/summary', exist_ok=True)
 matrix_properties = {
     'young_modulus': 3.6,           # GPa
     'tensile_strength': 100,        # MPa
-    'thermal_conductivity': 0.25,   # W/mK
+    'thermal_conductivity': 0.25,   # W/mK [Kurtz2019]
     'poisson_ratio': 0.40
 }
 
@@ -61,8 +61,8 @@ def run_sensitivity_analysis():
     # ----------------------------------------------------------------------
     # Sweep 1: Aspect Ratio Sensitivity
     # ----------------------------------------------------------------------
-    print("1. Running aspect ratio sensitivity sweep (alpha: 10 to 2000)...")
-    ar_sweep = np.linspace(10, 2000, 100)
+    print("1. Running aspect ratio sensitivity sweep (alpha: 10 to 10000)...")
+    ar_sweep = np.linspace(10, 10000, 100)
     V_f_fixed = 0.15  # 15 vol% loading
     
     E_random = np.zeros_like(ar_sweep)

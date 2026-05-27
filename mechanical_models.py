@@ -102,10 +102,10 @@ class MechanicalSimulator:
         E_c = self.E_m * (1 + xi * eta * V_f) / (1 - eta * V_f)
 
         if orientation == 'random':
-            # Simple 3D random orientation factor (approximate)
-            # [Cox1952] DOI: 10.1088/0508-3443/3/3/302
-            # Manuscript ¶22: η₀ = 0.2 for ROM but HT uses ×0.5 for random
-            E_c *= 0.5
+            # Apply orientation factor only to the reinforcement contribution.
+            # The matrix is isotropic; orientation of fillers must not reduce
+            # the matrix modulus.  At V_f=0 this returns E_m exactly.
+            E_c = self.E_m + 0.5 * (E_c - self.E_m)
 
         return E_c
 
@@ -691,17 +691,6 @@ class MechanicalSimulator:
             key = '+'.join(combo)
             if show_progress:
                 print(f"      {i+1}/{len(filler_combinations)}: {key}")
-            
-            n = len(combo)
-            
-            # Pre-calculate fractions for each volume fraction
-            all_fractions = []
-            for Vf in volume_fractions:
-                if distribution == 'equal':
-                    all_fractions.append([Vf / n] * n)
-                else:
-                    # For other distributions, would need to implement
-                    all_fractions.append([Vf / n] * n)
             
             mc_result = self.sequential_halpin_tsai_monte_carlo(
                 volume_fractions,

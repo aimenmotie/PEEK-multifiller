@@ -45,7 +45,7 @@ We conducted a comprehensive sensitivity analysis of the PEEK + CNT composite to
 
 ### S4.3. Volume Fraction & Orientation Sensitivity (V_f: 0% to 30%)
 *   We swept CNT volume fraction from $0\text{ to }30\%$ comparing random 3D orientation and aligned unidirectional orientation.
-*   **Modulus**: Under aligned orientation, $E_c$ reaches a maximum of **$153.2\text{ GPa}$** at $30\text{ vol\%}$, compared to **$78.4\text{ GPa}$** under random orientation.
+*   **Modulus**: Under aligned orientation, $E_c$ reaches a maximum of **$276.1\text{ GPa}$** at $30\text{ vol\%}$, compared to **$139.9\text{ GPa}$** under random orientation.
 *   **Thermal Conductivity**: Rises monotonically with volume fraction, showing a stable, non-linear curvature due to anisotropic Kapitza-corrected coupling.
 *   **Data Source**: `output/data/summary/cnt_sensitivity_loading.csv`
 *   **Plot**: `output/figures/png/cnt_sensitivity_loading.png`

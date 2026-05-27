@@ -418,6 +418,7 @@ class ThermalSimulator:
                                            V_f_total: Union[float, np.ndarray],
                                            filler_list: List[str],
                                            fractions: Optional[List[float]] = None,
+                                           distribution: str = 'equal',
                                            n_samples: int = 10000,
                                            return_samples: bool = False,
                                            show_progress: bool = False) -> Dict[str, Any]:
@@ -478,7 +479,13 @@ class ThermalSimulator:
 
                 # Adjust fractions for this volume fraction
                 if fractions is None:
-                    current_fractions = [Vf / len(filler_list)] * len(filler_list)
+                    n = len(filler_list)
+                    if distribution == 'equal':
+                        current_fractions = [Vf / n] * n
+                    else:
+                        alpha = np.ones(n)  # symmetric Dirichlet
+                        raw = np.random.dirichlet(alpha)
+                        current_fractions = (raw * Vf).tolist()  # FIX: Dirichlet sampling for non-equal distribution
                 else:
                     current_fractions = fractions
 
@@ -521,7 +528,13 @@ class ThermalSimulator:
 
         else:
             if fractions is None:
-                current_fractions = [V_f_total / len(filler_list)] * len(filler_list)
+                n = len(filler_list)
+                if distribution == 'equal':
+                    current_fractions = [V_f_total / n] * n
+                else:
+                    alpha = np.ones(n)  # symmetric Dirichlet
+                    raw = np.random.dirichlet(alpha)
+                    current_fractions = (raw * V_f_total).tolist()  # FIX: Dirichlet sampling for non-equal distribution
             else:
                 current_fractions = fractions
 
@@ -672,6 +685,7 @@ class ThermalSimulator:
             mc_result = self.sequential_nan_model_monte_carlo(
                 volume_fractions,
                 combo,
+                distribution=distribution,  # FIX: Dirichlet sampling for non-equal distribution
                 n_samples=n_samples,
                 show_progress=show_progress
             )
@@ -732,7 +746,12 @@ class ThermalSimulator:
                 if Vf == 0:
                     k_vals.append(self.k_m)
                 else:
-                    fracs = [Vf / n] * n if distribution == 'equal' else [Vf / n] * n
+                    if distribution == 'equal':
+                        fracs = [Vf / n] * n
+                    else:
+                        alpha = np.ones(n)  # symmetric Dirichlet
+                        raw = np.random.dirichlet(alpha)
+                        fracs = (raw * Vf).tolist()  # FIX: Dirichlet sampling for non-equal distribution
                     k = self.sequential_nan_model(Vf, combo, fractions=fracs, a_k=a_k)
                     k_vals.append(k)
 

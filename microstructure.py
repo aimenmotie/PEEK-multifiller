@@ -128,9 +128,9 @@ class MicrostructureGenerator:
                 'linewidth': 1
             },
             'Graphene Nanoplatelets': {
-                'shape': 'rectangle',
-                'aspect_ratio': 3.0,
-                'base_radius': 0.4,
+                'shape': 'ellipse',
+                'aspect_ratio': 8.0,
+                'base_radius': 0.05,
                 'color': 'black',
                 'alpha': 0.5,
                 'edgecolor': 'darkgray',
@@ -146,13 +146,13 @@ class MicrostructureGenerator:
                 'linewidth': 1
             },
             'Carbon Nanotubes': {
-                'shape': 'line',
-                'aspect_ratio': 10.0,
-                'base_radius': 0.1,
+                'shape': 'ellipse',
+                'aspect_ratio': 12.0,
+                'base_radius': 0.04,
                 'color': 'red',
                 'alpha': 0.8,
-                'edgecolor': 'darkred',
-                'linewidth': 2
+                'edgecolor': 'black',
+                'linewidth': 1
             }
         }
         
@@ -239,7 +239,7 @@ class MicrostructureGenerator:
                 width = 2 * base_radius * aspect_ratio
                 height = 2 * base_radius
                 ellipse = Ellipse((x, y), width, height, 
-                                angle=np.degrees(orientations[i]),
+                                angle=np.degrees(orientations[i]) if filler_type != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                 facecolor=color, edgecolor='black',
                                 alpha=alpha, linewidth=1)
                 ax.add_patch(ellipse)
@@ -249,7 +249,7 @@ class MicrostructureGenerator:
                 height = 2 * base_radius
                 # Create rotated rectangle
                 rect = Rectangle((x - width/2, y - height/2), width, height,
-                               angle=np.degrees(orientations[i]),
+                               angle=np.degrees(orientations[i]) if filler_type != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                facecolor=color, edgecolor='black',
                                alpha=alpha, linewidth=1)
                 ax.add_patch(rect)
@@ -365,7 +365,7 @@ class MicrostructureGenerator:
                     width = 2 * params['base_radius'] * params['aspect_ratio']
                     height = 2 * params['base_radius']
                     ellipse = Ellipse((x, y), width, height,
-                                    angle=np.degrees(orientations[i]),
+                                    angle=np.degrees(orientations[i]) if filler_type != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                     facecolor=params['color'], 
                                     edgecolor='black',
                                     alpha=params['alpha'], linewidth=1)
@@ -374,7 +374,7 @@ class MicrostructureGenerator:
                     width = 2 * params['base_radius'] * params['aspect_ratio']
                     height = 2 * params['base_radius']
                     rect = Rectangle((x - width/2, y - height/2), width, height,
-                                   angle=np.degrees(orientations[i]),
+                                   angle=np.degrees(orientations[i]) if filler_type != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                    facecolor=params['color'], edgecolor='black',
                                    alpha=params['alpha'], linewidth=1)
                     ax.add_patch(rect)
@@ -445,7 +445,7 @@ class MicrostructureGenerator:
                     width = 2 * params['base_radius'] * params['aspect_ratio']
                     height = 2 * params['base_radius']
                     ellipse = Ellipse((x, y), width/2, height/2,  # Smaller for comparison
-                                    angle=np.degrees(orientations[i]) if i < len(orientations) else 0,
+                                    angle=np.degrees(orientations[i]) if filler_name != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                     facecolor=params['color'], edgecolor='black',
                                     alpha=0.7, linewidth=1)
                     ax.add_patch(ellipse)
@@ -489,8 +489,12 @@ class MicrostructureGenerator:
             for j in range(10):
                 x, y = np.random.uniform(1, 9, 2)
                 if params['shape'] == 'ellipse':
-                    ellipse = Ellipse((x, y), 0.8, 0.3, 
-                                    angle=np.random.uniform(0, 180),
+                    w = 1.0 if filler == 'Graphene Nanoplatelets' else 0.8
+                    h = 0.1 if filler == 'Graphene Nanoplatelets' else 0.3
+                    if filler == 'Carbon Nanotubes':
+                        w, h = 0.8, 0.06
+                    ellipse = Ellipse((x, y), w, h, 
+                                    angle=np.random.uniform(0, 180) if filler != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                     facecolor=params['color'], alpha=0.7)
                     ax.add_patch(ellipse)
                 else:
@@ -520,8 +524,12 @@ class MicrostructureGenerator:
                 for j in range(min(num, 5)):
                     x, y = np.random.uniform(1, 9, 2)
                     if params['shape'] == 'ellipse':
-                        ellipse = Ellipse((x, y), 0.8, 0.3,
-                                        angle=np.random.uniform(0, 180),
+                        w = 1.0 if filler == 'Graphene Nanoplatelets' else 0.8
+                        h = 0.1 if filler == 'Graphene Nanoplatelets' else 0.3
+                        if filler == 'Carbon Nanotubes':
+                            w, h = 0.8, 0.06
+                        ellipse = Ellipse((x, y), w, h,
+                                        angle=np.random.uniform(0, 180) if filler != 'Graphene Nanoplatelets' else np.random.uniform(-5, 5),
                                         facecolor=params['color'], alpha=0.7)
                         ax.add_patch(ellipse)
                     else:

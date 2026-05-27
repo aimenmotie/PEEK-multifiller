@@ -42,8 +42,8 @@ class PEEKCompositeSimulation:
             'name': 'PEEK',
             'young_modulus': 3.6,           # GPa
             'tensile_strength': 100,        # MPa
-            'thermal_conductivity': 0.25,   # W/mK
-            'poisson_ratio': 0.4,
+            'thermal_conductivity': 0.25,   # W/mK [Kurtz2019]
+            'poisson_ratio': 0.40,
             'density': 1.32                  # g/cm³
         }
 
@@ -72,9 +72,9 @@ class PEEKCompositeSimulation:
             'Graphene Nanoplatelets': {
                 'young_modulus': 1000,          # GPa [King2018; Chen2016]
                 'tensile_strength': 5000,       # MPa
-                'thermal_conductivity': 1200.0, # (3000+2*300)/3 = 1200 W/mK (isotropic average)
+                'thermal_conductivity': 1003.3, # (3000+2*5.0)/3 = 1003.3 W/mK (isotropic average)
                 'k_axial': 3000.0,              # W/mK in-plane [King2018; Chen2016]
-                'k_transverse': 300.0,          # W/mK through-thickness [King2018; Chen2016]
+                'k_transverse': 5.0,            # W/mK through-thickness — corrected per Kim 2016
                 'aspect_ratio': 1000,           # diameter/thickness [King2018]
                 'geometry': 'platelet',         # 2D reinforcement
                 'radius_nm': 10.0,              # half-thickness = 10 nm [Manuscript ¶46]
