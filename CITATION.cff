@@ -1,8 +1,16 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-  - name: "PEEK Composite Simulation Framework Contributors"
+  - family-names: "Babaci"
+    given-names: "Aimen Motie"
 title: "Stochastic micromechanical bounds on mechanical and thermal properties of multi-filler PEEK composites"
 version: 1.0.0
 date-released: 2026-05-27
 url: "https://github.com/aimenmotie/PEEK-multifiller"
+repository-code: "https://github.com/aimenmotie/PEEK-multifiller"
+keywords:
+  - "PEEK composites"
+  - "Micromechanics"
+  - "Thermal conductivity"
+  - "Modulus of Elasticity"
+  - "Simulation Monte-Carlo"
